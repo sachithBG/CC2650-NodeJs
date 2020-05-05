@@ -1,0 +1,894 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>CC2650</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.9/dist/css/bootstrap-select.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,500,500i,700" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!-- <link rel="stylesheet" href="../css/data_view.css" type="text/css"> -->
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"> -->
+    <style>
+        .filterable {
+            margin-top: 50px;
+            margin-left: 20px;
+            margin-right: 0;
+            padding: 1px;
+            max-width: 98%;
+        }
+        .filterable .panel-heading .pull-right{
+            margin-top: 2px;
+        }
+        .filterable .filters input[disabled]{
+            background-color: transparent;
+            border: none;
+            cursor: auto;
+            box-shadow: none;
+            padding: 0;
+            height: auto;
+        }
+        .filterable .filters input[disabled]::-webkit-input-placeholder{
+            color: #333;
+        }
+        .filterable .filters input[disabled]::-moz-placeholder{
+            color: #333;
+        }
+        .filterable .filters input[disabled]:-ms-input-placeholder{
+            color: #333;
+        }
+        .my-custom-scrollbar {
+            position: relative;
+            height: 400px;
+            overflow: auto;
+            }
+        .table-wrapper-scroll-y {
+            display: block;
+        }
+        .btn-link{
+            padding: 0;
+        }
+
+        /* Prevent scrollbars to appear when waves go out of bound */
+        .sonar-wrapper {
+            position: relative;
+            z-index: 0;
+            overflow: hidden;
+            padding: 0;
+            margin: 0px;
+        }
+
+        /* The circle */
+        .sonar-emitter {
+            position: relative;
+            margin: 0 auto;
+            /* width: 25px; */
+            height: 25px;
+            border-radius: 20000px;
+            background-color: HSL(195, 100%, 50%);
+        }
+
+        /* the 'wave', same shape and size as its parent */
+        .sonar-wave {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 20000px;
+            background-color: HSL(195, 100%, 50%);
+            opacity: 0;
+            z-index: -1;
+            pointer-events: none;
+        }
+        .sonar-wave {
+            animation: sonarWave 2s linear infinite;
+        }
+
+        @keyframes sonarWave {
+            from {
+                opacity: 0.4;
+            }
+            to {
+                transform: scale(3);
+                opacity: 0;
+            }
+        }
+
+        /* for graph */
+        
+    </style>
+</head>
+<body>
+    <div class="col-md-6 text-center loader" style="margin: 20% 25%;">
+        <div class="spinner-grow" style="width: 5rem; height: 5rem;" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+    <div class="loading hide">
+    <form action="/logout?_method=DELETE" method="POST">
+        <div class="" style="float: right;margin: 5px;">
+            <button class="btn btn-sm btn-outline-primary" type="submit" style="background-color: white;margin: 10px;">Log Out</button>
+        </div>
+        <div class="text-success" style="float: right;margin: 5px;">
+            <h4>Hi <%= name %></h4>
+        </div>
+        <div class="text-primary" style="float: left; font-size: 12em;margin: 5px;">
+            <h4><span class=""></span> CC2650</h4>
+        </div>
+    </form>
+    <form class="form-control" class="card">
+      <div class="">
+        <div class="text-primary">
+            <div class="panel panel-primary filterable" style="width: 200%;" id="table_">
+                <div class="panel-heading">
+                    <div class="sonar-wrapper">
+                        <div class="sonar-emitter">
+                            <div class="sonar-wave"></div>
+                            <div class="pull-left" style="width: 300px;">
+                                <h4 class="panel-title" style="margin-right: 10px;margin-top: 30px;">All data</h4>
+                            </div>
+                            <div class="pull-right">
+                                <button href="#" class="btn btn-default btn-xs btn-filter" style="margin-right: 10px;margin-top: 30px;">
+                                    <span class="glyphicon glyphicon-filter"></span> Filter
+                                </button>
+                            </div>
+                            <div class="pull-right">
+                                <button href="#" type="button" class="btn btn-default btn-xs btn_refreshTbl" style="margin-right: 10px;margin-top: 30px;">
+                                    <span class="glyphicon glyphicon-refresh" role="status"></span> Refresh
+                                </button>
+                            </div>
+                            <!-- <div class="pull-right spinner-grow text-success"  style="margin-right: 10px;margin-top: 30px;"></div> -->
+                        </div>
+                    <!-- <h3 class="panel-title">New data</h3> -->
+                    </div>
+                </div>
+                <div class="table-wrapper-scroll-y my-custom-scrollbar" style="overflow-x: auto;">
+                <div>
+                <table class="table responsive-table highlight table-striped table-sm" cellspacing="0" width="100%" id="data-tbl"> 
+                    <thead>
+                        <tr class="filters" >
+                            <th scope="col" style="width:50px"><input type="text" class="form-control"  placeholder="#" [value]="searchValue" disabled></th>
+                            <th scope="col" ><input name="Id" type="text" class="form-control"  placeholder="Id" [value]="searchValue" disabled></th>
+                            <th scope="col" ><input name="SensName" type="text" class="form-control"  placeholder="SensName" [value]="searchValue" disabled></th>
+                            <th scope="col" ><input name="Date" type="text" class="form-control"  placeholder="Date" [value]="searchValue" disabled></th>
+                            <th scope="col" ><input name="Time" type="text" class="form-control"  placeholder="Time" [value]="searchValue" disabled></th>
+                            <th scope="col" ><input name="Temp" type="text" class="form-control"  placeholder="Temp" [value]="searchValue" disabled></th>
+                            <th scope="col" ><input name="Humidity" type="text" class="form-control"  placeholder="Humidity" [value]="searchValue" disabled></th>
+                            <th scope="col" ><input name="Barometer" type="text" class="form-control"  placeholder="Barometer" [value]="searchValue" disabled></th>
+                            <th scope="col" ><input name="Accelerometer" type="text" class="form-control"  placeholder="Accelerometer" [value]="searchValue" disabled></th>
+                            <th scope="col" ><input name="Magnetometer" type="text" class="form-control"  placeholder="Magnetometer" [value]="searchValue" disabled></th>
+                            <th scope="col" ><input name="Gyroscope" type="text" class="form-control"  placeholder="Gyroscope" [value]="searchValue" disabled></th>
+                            <th scope="col" ><input name="Light" type="text" class="form-control"  placeholder="Light" [value]="searchValue" disabled></th>
+                            <th scope="col" ><input name="Battery" type="text" class="form-control"  placeholder="Battery" [value]="searchValue" disabled></th>
+                        </tr>
+                    </thead>
+                    <tbody class="" style="height: 400px">
+                        <%if ((recipes_cont).length > 0) {%>
+                            <% var i = 0; %> 
+                            <% recipes.forEach(function(recipe) { %>
+                            <% i = i+1; var rec = [recipe]%> 
+                            <tr row_id= <% i %>>
+                            <td style="width: 100px" class="row_data"><%=i%></td>
+                            <td class="row_data"><%=recipe.ID%></td>
+                            <td class="table-bordered row_data" ><%=recipe.SenName%></td>
+                            <td class="row_data"><%=recipe.Date%></td>
+                            <td class="table-bordered row_data" ><%=recipe.Time%></td>
+                            <td class="row_data"><%=recipe.Temp%></td>
+                            <td class="table-bordered row_data" ><%=recipe.Humidity%></td>
+                            <td class="row_data"><%=recipe.Barometer%></td>
+                            <td class="table-bordered row_data" ><%=recipe.Accelerometer%></td>
+                            <td class="row_data"><%=recipe.Magnetometer%></td>
+                            <td class="table-bordered row_data" ><%=recipe.Gyroscope%></td>
+                            <td class="row_data"><%=recipe.Light%></td>
+                            <td class="table-bordered row_data" ><%=recipe.Battery%></td>
+                            <td style="width: 100px">
+                                <!-- <a class="action-btn edit_me" style="cursor: pointer;" onclick="onEdit('<%=recipe.ID%>')" >
+                                    <i class="material-icons" >edit</i>
+                                </a> -->
+                                <!-- <a class="action-btn" style="float: right; cursor: pointer;" onclick="add('<%=recipe.ID%>')" >
+                                    <i class="material-icons">add</i>
+                                </a> -->
+                                <a class="action-btn table-remove" style="float: right; cursor: pointer;" >
+                                    <i class="material-icons text-danger">delete</i>
+                                </a>
+                                <span class="btn_edit" > <a href="#" class="material-icons btn btn-link" row_id=<% i %> > edit</a> </span>
+                                <span class="btn_save"> <a href="#" class="material-icons btn btn-link" row_id=<% i %>> save</a> | </span> 
+                                <!--onclick="onDelete('<%=recipe.ID%>')"-->
+                                <span class="btn_cancel"> <a href="#" class="material-icons btn btn-link" row_id=<% i %>> cancel</a> | </span>
+                                </td>
+                            </tr>
+                            <% }); %>
+                            <% } %>
+                            <tr>
+                            <td style="text-align: center">End</td>
+                            </tr>
+                    </tbody>
+                    </table>
+                </div>
+                </div>
+            </div>
+            <!-- <button id="send-data"class="btn btn-success btn-sm" style="float: right;margin-right: 20px;">Save</button> -->
+        </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm" style="float: right;margin-right: 175px;">
+                    <i class="fa fa-download fa-sm text-white-50"></i> Generate Report</a>
+            </div>
+        </div>
+    </form> 
+    <!-- ALL DATA -->
+    <form action="/" method="GET" style="position: relative;">
+        <button type="submit" class="btn btn-primary btn-sm" style="float: right;margin-top: 522px;margin-right: -100px;">New data</button>
+    </form>
+    <!--..................... all data tbl ...................... -->
+    
+    <div class="container text-center" style="margin-top: 600px;">
+        
+        <div class="spinner-grow text-primary" role="status"></div>
+        <div class="row">
+        <div class='col-md'>
+            <div class="col-sm-5 form-group" style="margin-left: 25px;float: left;">
+                <select id="firstSelectorID" class="selectpicker form-control" data-live-search="true" data-actions-box="true" data-style="btn-default"
+                title="Choose ID..." data-header="Select a condiment" style="width: 100px;float: right;margin-right: 25px;">
+                    <!-- <optgroup label="Picnic">
+                      <option>Mustard</option>
+                      <option>Ketchup</option>
+                      <option>Relish</option>
+                    </optgroup> -->
+                </select>
+                <!-- <select id="firstSelector" class="custom-select custom-select-lg mb-3" style="width: 200px;float: right;margin-right: 25px;" title="Choose one of the following...">
+                    <option selected >First selector</option>
+                </select> -->
+            </div>
+            <div class='col-sm-5 form-group' style="margin-right: 18px;float: right;">
+                <select id="firstSelector" class="selectpicker form-control" data-live-search="true" data-actions-box="true" data-style="btn-default"
+                title="Choose data type..." data-header="Select a condiment" style="width: 100px;float: right;margin-right: 25px;">
+                </select>
+            </div>
+        </div>
+        <div class='col-md border-left border-primary'>
+            <div class="col-sm-5 form-group" style="float: left;">
+                <select id="secondSelectorID" class="selectpicker form-control" data-live-search="true" data-actions-box="true" data-style="btn-default"
+                title="Choose ID..." data-header="Select a condiment" style="width: 100px;float: right;margin-right: 25px;">
+                </select>
+            </div>
+            <div class='col-sm-5 form-group' style="margin-right: 12px;float: right;">
+                <select id="secondSelector" class="selectpicker form-control" data-live-search="true" data-actions-box="true" data-style="btn-default"
+                title="Choose data type..." data-header="Select a condiment" style="width: 100px;float: right;margin-right: 25px;">
+                </select>
+            </div>
+            <!-- <div class="form-group" style="margin: 5px;">
+                <select id="secondSelector" class="custom-select custom-select-lg mb-3" style="width: 200px;float: right;margin-right: 25px;;">
+                    <option selected >Second selector</option>
+                </select>               
+            </div> -->
+        </div>
+        </div>
+        <div class="row text-center">
+        <div class="col">
+          <div class="col-md" style="margin: 10px;">
+            <div class='col-sm'>
+                <div class="form-group">
+                    <div class='input-group date' id='datetimepicker6'>
+                        <input type='text' class="form-control" placeholder="Start time.." title="Start time.."/>
+                        <span class="input-group-addon">
+                            <span class="glyphicon glyphicon-calendar"></span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class='col-sm'>
+                <div class="form-group">
+                    <div class='input-group date' id='datetimepicker7'>
+                        <input type='text' class="form-control" placeholder="End time.." title="End time.."/>
+                        <span class="input-group-addon">
+                            <span class="glyphicon glyphicon-calendar"></span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="pull-right" style="margin-top: 20px;">
+                <button href="#" type="button" class="btn btn-primary btn-sm btn_next" style="margin-right: 30px;">
+                    <span class="glyphicon glyphicon-forward" role="status"></span> Next
+                </button>
+            </div>
+          </div>
+        </div>
+          <div class="col-md border-left border-primary" style="margin: 10px;">
+            <div class='col-sm'>
+                <div class="form-group">
+                    <div class='input-group date' id='datetimepicker1'>
+                        <input type='text' class="form-control" placeholder="Start time.." />
+                        <span class="input-group-addon">
+                            <span class="glyphicon glyphicon-calendar"></span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class='col-sm'>
+                <div class="form-group">
+                    <div class='input-group date' id='datetimepicker2'>
+                        <input type='text' class="form-control" placeholder="End time.." />
+                        <span class="input-group-addon">
+                            <span class="glyphicon glyphicon-calendar"></span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+        <div class="raw">
+        <div class="col" style="margin: 10px;">
+            <div class="pull-right" style="margin-top: -40px;">
+                <button href="#" type="button" class="btn btn-primary btn-sm btn_next1" style="margin-right: 33px;">
+                    <span class="glyphicon glyphicon-forward" role="status"></span> Next
+                </button>
+            </div>
+            <canvas id="lineChart1"></canvas>
+        </div>
+        <div class="col" style="margin: 10px;">
+            <canvas id="lineChart2"></canvas>
+        </div>
+          <!-- <div class="col-6" style="margin: 10px;"><canvas id="lineChart1"></canvas></div> -->
+        </div>
+    </div>
+</div>
+    <!-- .......... -->
+  <!-- <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.0/js/bootstrap.min.js"></script> -->
+  <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+  <!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script> -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script> 
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.9/dist/js/bootstrap-select.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script> -->
+  <!-- <script src="../js/data_view.js" type="script"></script> -->
+  <script>
+      
+$(document).ready(function(){
+    setTimeout(function(){ 
+            $('.loading').show();
+            $('.loading').removeClass('hide');
+            $('.loader').hide();
+         }, 2000);
+    $('.filterable .btn-filter').click(function(e){
+        e.preventDefault();
+        var $panel = $(this).parents('.filterable'),
+        $filters = $panel.find('.filters input'),
+        $tbody = $panel.find('.table tbody');
+        if ($filters.prop('disabled') == true) {
+            $filters.prop('disabled', false);
+            $filters.first().focus();
+        } else {
+            $filters.val('').prop('disabled', true);
+            $tbody.find('.no-result').remove();
+            $tbody.find('tr').show();
+        }
+    });
+    $('.filterable .filters input').keyup(function(e){
+        /* Ignore tab key */
+        var code = e.keyCode || e.which;
+        if (code == '9') return;
+        /* Useful DOM data and selectors */
+        var $input = $(this),
+        inputContent = $input.val().toLowerCase(),
+        $panel = $input.parents('.filterable'),
+        column = $panel.find('.filters th').index($input.parents('th')),
+        $table = $panel.find('.table'),
+        $rows = $table.find('tbody tr');
+        /* Dirtiest filter function ever ; */
+        var $filteredRows = $rows.filter(function(){
+            var value = $(this).find('td').eq(column).text().toLowerCase();
+            return value.indexOf(inputContent) === -1;
+        });
+        /* Clean previous no-result if exist */
+        $table.find('tbody .no-result').remove();
+        /* Show all rows, hide filtered ones (never do that outside of a demo ! xD) */
+        $rows.show();
+        $filteredRows.hide();
+        /* Prepend no-result row if all rows are filtered */
+        if ($filteredRows.length === $rows.length) {
+            $table.find('tbody').prepend($('<tr class="no-result text-center"><td colspan="'+ $table.find('.filters th').length +'">No result found</td></tr>'));
+        }
+    });
+
+    // ////////
+    $('#send-data').click(function () {
+        var rows = [];
+        $('#data-tbl tbody tr').each(function () {
+            var ID = $(this).find('td').eq(1).text().trim();
+            var SenName = $(this).find('td').eq(2).text().trim();
+            var Dt = $(this).find('td').eq(3).text().trim();
+            var Time = $(this).find('td').eq(4).text().trim();
+            var Temp = $(this).find('td').eq(5).text().trim();
+            var Humidity = $(this).find('td').eq(6).text().trim();
+            var Barometer = $(this).find('td').eq(7).text().trim();
+            var Accelerometer = $(this).find('td').eq(8).text().trim();
+            var Magnetometer = $(this).find('td').eq(9).text().trim();
+            var Gyroscope = $(this).find('td').eq(10).text().trim();
+            var Light = $(this).find('td').eq(11).text().trim();
+            var Battery = $(this).find('td').eq(12).text().trim();
+            const sdt = 'sens_tag_day_'+Dt
+            const tm = 'time_'+Time
+            var row = { [sdt] : { [tm] : { [ID] : { 'ID':ID , 'SenName': SenName, 'Date': Dt, 'Time': Time, 'Temp': Temp, 'Humidity': Humidity, 'Barometer': Barometer ,
+            'Accelerometer': Accelerometer, 'Magnetometer': Magnetometer, 'Gyroscope': Gyroscope, 'Light': Light, 'Battery': Battery
+                        } }} };
+            rows.push(row);
+        });
+        // alert(JSON.stringify(rows))
+        fetch('/data/all', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({data:rows})
+        });
+        // console.log(rows[0]);
+        // $.post('@Url.Action("Proccess","Home")', { rows: rows }, function (data) {
+        //     console.log(data);
+        // });
+
+    });
+
+    $(document).find('.btn_save').hide();
+    $(document).find('.btn_cancel').hide();
+    
+    //--->button > edit > start	
+    $(document).on('click', '.btn_edit', function(event) 
+    {
+        event.preventDefault();
+        var tbl_row = $(this).closest('tr');
+
+        var row_id = tbl_row.attr('row_id');
+
+        tbl_row.find('.btn_save').show();
+        tbl_row.find('.btn_cancel').show();
+        tbl_row.attr('contenteditable', 'true');
+        //hide edit button
+        tbl_row.find('.btn_edit').hide(); 
+
+        //make the whole row editable
+        tbl_row.find('.row_data')
+        .attr('contenteditable', 'true')
+        .attr('edit_type', 'button')
+        .addClass('text-danger')
+        .css('padding','3px')
+        // .addClass('bg-success')
+        //--->add the original entry > start
+        tbl_row.find('.row_data').each(function(index, val) 
+        {  
+            //this will help in case user decided to click on cancel button
+            $(this).attr('original_entry', $(this).html());
+        }); 		
+        //--->add the original entry > end
+
+    });
+    //--->button > edit > end
+    //--->button > cancel > start	
+    $(document).on('click', '.btn_cancel', function(event) 
+    {
+        event.preventDefault();
+
+        var tbl_row = $(this).closest('tr');
+
+        var row_id = tbl_row.attr('row_id');
+
+        //hide save and cancel buttons
+        tbl_row.find('.btn_save').hide();
+        tbl_row.find('.btn_cancel').hide();
+        tbl_row.attr('contenteditable', 'false');
+        //show edit button
+        tbl_row.find('.btn_edit').show();
+
+        //make the whole row editable
+        tbl_row.find('.row_data')
+        .attr('edit_type', 'click')
+        .attr('contenteditable', 'false')	 
+        // .removeClass('bg-warning')
+        .removeClass('text-danger')
+        .css('padding','') 
+
+        tbl_row.find('.row_data').each(function(index, val) 
+        {   
+            $(this).html( $(this).attr('original_entry') ); 
+        });  
+    });
+    //--->button > cancel > end
+    //--->save whole row entery > start	
+    $(document).on('click', '.btn_save', function(event) 
+    {
+        event.preventDefault();
+        var tbl_row = $(this).closest('tr');
+
+        var row_id = tbl_row.attr('row_id');
+       
+        //hide save and cacel buttons
+        tbl_row.find('.btn_save').hide();
+        tbl_row.find('.btn_cancel').hide();
+        tbl_row.attr('contenteditable', 'false');
+        //show edit button
+        tbl_row.find('.btn_edit').show();
+
+
+        //make the whole row editable
+        tbl_row.find('.row_data')
+        .attr('edit_type', 'click')
+        .attr('contenteditable', 'false')	
+        // .removeClass('bg-warning')
+        .removeClass('text-danger')
+        .css('padding','') 
+
+        //--->get row data > start
+        var arr = {}; 
+        var raw_val = []
+        tbl_row.find('.row_data').each(function(index, val) 
+        {   
+            var col_name = $(this).attr('col_name');  
+            var col_val  =  $(this).html();
+            raw_val.push(col_val)
+            arr[col_name] = col_val;
+        });
+        const sdt = 'sens_tag_day_'+raw_val[3]
+        const tm = 'time_'+raw_val[4]
+        var row = { [sdt] : { [tm] : { [raw_val[1]] : { 'ID':raw_val[1] , 'SenName': raw_val[2], 'Date': raw_val[3], 'Time': raw_val[4], 'Temp': raw_val[5], 'Humidity': raw_val[6], 'Barometer': raw_val[7] ,
+        'Accelerometer': raw_val[8], 'Magnetometer': raw_val[9], 'Gyroscope': raw_val[10], 'Light': raw_val[11], 'Battery': raw_val[12]
+                    } } } };
+        // alert(JSON.stringify(row))
+        fetch('/data/all', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({data:row})
+        });
+        //--->get row data > end
+
+        //use the "arr"	object for your ajax call
+        $.extend(arr, {row_id:row_id});
+
+        //out put to show
+        $('.post_msg').html( '<pre class="bg-success">'+JSON.stringify(arr, null, 2) +'</pre>')
+        
+    });
+    //--->save whole row entery > end
+    ////////////////////////////////////////////////
+    $('#table_').on('click', '.table-remove', function (event) {
+        event.preventDefault();
+        var tbl_row = $(this).closest('tr');
+        var raw_val = []
+        tbl_row.find('.row_data').each(function(index, val) 
+        {     
+            var col_val  =  $(this).html();
+            raw_val.push(col_val)
+        });
+        const sdt = 'sens_tag_day_'+raw_val[3]
+        const tm = 'time_'+raw_val[4]
+        var row = { [sdt] : { [tm] : { [raw_val[1]] : { 'ID':raw_val[1] , 'SenName': raw_val[2], 'Date': raw_val[3], 'Time': raw_val[4], 'Temp': raw_val[5], 'Humidity': raw_val[6], 'Barometer': raw_val[7] ,
+        'Accelerometer': raw_val[8], 'Magnetometer': raw_val[9], 'Gyroscope': raw_val[10], 'Light': raw_val[11], 'Battery': raw_val[12]
+                    } } } };
+        // alert(JSON.stringify(row))
+        fetch('/data/all', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({data:row})
+        });
+        $(this).parents('tr').detach();
+    });
+    $('#table_').on('click', '.edit_me', function () {
+        $(this).find('tr').contentEditable;
+        // alert('recipe')
+    });
+
+    $(document).on('click', '.btn_refreshTbl', function(event) 
+    {   event.preventDefault();
+        get_data();
+    }); 
+
+// ///////for graph..................................
+    $(function () {
+        //  1st calender
+        $('#datetimepicker6').datetimepicker({ format : 'YYYY-MM-DD HH:mm:ss'});
+        $('#datetimepicker7').datetimepicker({
+            useCurrent: false, //Important! See issue #1075
+            format : 'YYYY-MM-DD HH:mm:ss'
+        });
+        $("#datetimepicker6").on("dp.change", function (e) {
+            $('#datetimepicker7').data("DateTimePicker").minDate(e.date);
+            // alert($("#datetimepicker6").find("input").val())
+        });
+        $("#datetimepicker7").on("dp.change", function (e) {
+            $('#datetimepicker6').data("DateTimePicker").maxDate(e.date);
+        });
+        //  2nd calender
+        $('#datetimepicker1').datetimepicker({format : 'YYYY-MM-DD HH:mm:ss'});
+        $('#datetimepicker2').datetimepicker({
+            useCurrent: false, //Important! See issue #1075
+            format : 'YYYY-MM-DD HH:mm:ss'
+        });
+        $("#datetimepicker1").on("dp.change", function (e) {
+            $('#datetimepicker2').data("DateTimePicker").minDate(e.date);
+        });
+        $("#datetimepicker2").on("dp.change", function (e) {
+            $('#datetimepicker1').data("DateTimePicker").maxDate(e.date);
+        });
+        
+    });
+
+    macs = getIds();
+    var options = macs.options; //["Temp", "Humidity", "Light", "Battery"];
+    var ids = macs.mac; //["f0-f8-f2-86-18-83", "a4-34-f1-29-bf-85", "a4-34-f1-29-b4-26", "a4-34-f1-29-b7-15"]
+
+    ids.forEach( function(item) { 
+        var select1 = document.getElementById("firstSelectorID");
+        var option = document.createElement("option");
+        option.text = item;
+        select1.add(option, item);
+    });
+    options.forEach( function(item) { 
+        if(item == 'Temp' || item == 'Light' || item == 'Battery' || item == 'Humidity'){
+            var select2 = document.getElementById("firstSelector");
+            var option = document.createElement("option");
+            option.text = item;
+            select2.add(option, item);
+        }
+    });
+    ids.forEach( function(item) { 
+        var select1 = document.getElementById("secondSelectorID");
+        var option = document.createElement("option");
+        option.text = item;
+        select1.add(option, item);
+    });
+    options.forEach( function(item) { 
+        if(item == 'Temp' || item == 'Light' || item == 'Battery' || item == 'Humidity'){
+            var select2 = document.getElementById("secondSelector");
+            var option = document.createElement("option");
+            option.text = item;
+            select2.add(option, item);
+        }
+    });
+    // var data_set_1 = '';//["32.48", "32.50", "32.50", "32.50", "32.50"];
+    // var data_set_2 = '';//["32.12", "32.15", "32.12", "32.12", "32.08"];
+    // labels_set = ["13-03-2020/17-03", "13-03-2020/17-04", "13-03-2020/17-05", "13-03-2020/17-06", "13-03-2020/17-07"];
+    
+    $('.btn_next').click(function () {
+        getSelections(1).then((inputs) => {
+            var data_set_1 = inputs.set1;
+            var labels_set = inputs.date1;
+            tempChrt(data_set_1, labels_set, 1);
+        });
+        
+    });  
+    $('.btn_next1').click(function () {
+        getSelections(2).then((inputs) => {
+            var data_set_2 = inputs.set1;
+            var labels_set = inputs.date1;
+            tempChrt(data_set_2, labels_set, 2);
+        });
+    });  
+    
+    // //////////////////////////////////////////////////////////////////////////////////
+
+
+});
+// //  ---- refresh >
+const get_data = async () => {
+    try {
+        const response = await fetch('/data/all/refresh', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+        });
+        const json = await response.json();
+        // console.log(JSON.stringify(json.dta));
+        reftbl(json.dta, json.count);
+        // console.log(json.count);
+        // console.log(json.dta);
+        return json
+    } catch (error) {
+        console.log(error);
+    }
+};
+function reftbl(recipes, recipes_cont){
+    var i = 0;
+    if(recipes_cont > 0){ if ($('tbody').empty()){
+        recipes.forEach(function(recipe) {
+        i = i+1;
+        if(i == recipes_cont){return};
+        $('tbody').append(
+            '<tr row_id = "'+i+'"] >'+
+            '<td style="width: 100px" class="row_data">'+i+'</td>'+
+            '<td class="row_data">'+recipe.ID+'</td>'+
+            '<td class="table-bordered row_data" >'+recipe.SenName+'</td>'+
+            '<td class="row_data">'+recipe.Date+'</td>'+
+            '<td class="table-bordered row_data" >'+recipe.Time+'</td>'+
+            '<td class="row_data">'+recipe.Temp+'</td>'+
+            '<td class="table-bordered row_data" >'+recipe.Humidity+'</td>'+
+            '<td class="row_data">'+recipe.Barometer+'</td>'+
+            '<td class="table-bordered row_data" >'+recipe.Accelerometer+'</td>'+
+            '<td class="row_data">'+recipe.Magnetometer+'</td>'+
+            '<td class="table-bordered row_data" >'+recipe.Gyroscope+'</td>'+
+            '<td class="row_data">'+recipe.Light+'</td>'+
+            '<td class="table-bordered row_data" >'+recipe.Battery+'</td>'+
+            '<td style="width: 100px">'+
+                '<a class="action-btn table-remove" style="float: right; cursor: pointer;" >'+
+                    '<i class="material-icons text-danger">delete</i>'+
+                '</a>'+
+                '<span class="btn_edit" > <a href="#" class="material-icons btn btn-link " row_id='+i +' > edit</a> </span>'+
+                '<span class="btn_save"> <a href="#" class="material-icons btn btn-link" row_id='+ i +'> save</a> | </span>'+ 
+                '<span class="btn_cancel"> <a href="#" class="material-icons btn btn-link" row_id='+ i +'> cancel</a> | </span>'+
+                '</td>'+
+            '</tr>'                
+        )});
+    $('.btn_save').hide();
+    $('.btn_cancel').hide();
+    $('tbody').append(
+        '<tr>'+
+        '<td style="text-align: center">End</td>'+
+        '</tr>'
+    );
+        } };
+};
+
+// ////////////////////////////////////////////chart
+function getIds(){
+    var col_names = [];
+    var macaddrs = [];
+    var oTable = document.getElementById('data-tbl');
+    var rowLength = oTable.rows.length;
+    var cl = oTable.rows.item(0).cells;
+    var id1 = '';
+    var ids = new Map();
+    for (var i = 2; i < cl.length; i++) {
+        nm = cl[i].firstChild.name;
+        col_names.push(nm);
+        if(nm == 'SensName'){
+            id1 = i;
+        };
+    };
+    for (var i = 1; i < rowLength-1; i++) {
+        var oCells = oTable.rows.item(i).cells;
+        var va = oCells[id1].firstChild.data;
+        ids.set(va, 'mac');
+    };
+    for (let vegetable of ids.keys()) {
+        macaddrs.push(vegetable);
+    }
+    return {mac: macaddrs, options: col_names};
+};
+
+function getSelections(set){
+    var return_val = ''
+    if(set == 1){
+        var first_data_set_start_time = $("#datetimepicker6").find("input").val();
+        var first_data_set_end_time = $("#datetimepicker7").find("input").val();
+        var first_data_set_selector_id =$('#firstSelectorID').selectpicker().val();
+        var first_data_set_selector_typ =$('#firstSelector').selectpicker().val();
+        return_val = getDatafromColumn(first_data_set_selector_id, first_data_set_selector_typ, 
+                        first_data_set_start_time, first_data_set_end_time);
+    }else{
+        var second_data_set_start_time = $("#datetimepicker1").find("input").val();
+        var second_data_set_end_time = $("#datetimepicker2").find("input").val();
+        var second_data_set_selector_id =$('#secondSelectorID').selectpicker().val();
+        var second_data_set_selector_typ =$('#secondSelector').selectpicker().val();
+        return_val = getDatafromColumn(second_data_set_selector_id, second_data_set_selector_typ, 
+                        second_data_set_start_time, second_data_set_end_time);
+    }
+    return return_val;
+};
+
+async function getDatafromColumn(S_name, clm1, stDate, enDate){
+    var oTable = document.getElementById('data-tbl');
+    var dat = 'Date';
+    var tim = 'Time';
+    var snm = 'SensName';
+    var stDate = new Date(stDate);//.getTime();
+    var enDate = new Date(enDate);//.getTime();
+    var data_set = [];
+    var date_set = [];
+    var c1 = ''; var id1 = ''; var dt = '';var tm = '';
+    var rowLength = oTable.rows.length;
+    var cl = oTable.rows.item(0).cells;
+    for (var i = 2; i < cl.length; i++) {
+        nm = cl[i].firstChild.name;
+        if(nm == clm1 & clm1 != ""){
+            c1 = i;
+        };
+        if(nm == dat){
+            dt = i;
+        };
+        if(nm == tim){
+            tm = i;
+        };
+        if(nm == snm){
+            id1 = i;
+        };
+    }
+    if(c1 != ''){
+        for (var i = 1; i < rowLength-1; i++) {
+            var oCells = oTable.rows.item(i).cells;
+            var va = oCells[c1].firstChild.data;
+            var d1 = oCells[dt].firstChild.data;
+            var t1 = oCells[tm].firstChild.data;
+            var mac = oCells[id1].firstChild.data;
+            // d1 = d1.replace(/-/g, ',');
+            var d = d1; var t = t1.replace(/-/g, ':');
+            d1 = d1.split('-');
+            var mn = parseInt(d1[1])-1;
+            d1 = d1[2]+', '+mn+', '+d1[0];
+            t1 = t1.replace(/-/g, ', ');
+            var date1 = (d1+','+t1).split(',');
+            date1 = new Date(date1[0], date1[1], date1[2], date1[3], date1[4], date1[5]);
+            // date1 = date1.getTime();
+            // console.log(enDate);
+            if (stDate < date1 & enDate > date1 & mac == S_name){ 
+                // console.log("g1 is lesser than g2"+date1); 
+                data_set.push(va);
+                date_set.push(d+'/'+t);
+            }else if (stDate < date1 & enDate == 'Invalid Date' & mac == S_name){ 
+                // console.log(stDate+"g1 is greater than g2"+date1);
+                data_set.push(va);
+                date_set.push(d+'/'+t);
+            }
+        };
+    };
+    return {set1: data_set, date1: date_set}
+    // console.log(oCells[1].firstChild.data)
+}
+
+function tempChrt(data_set, labels_set, chart_no){
+    // [65, 59, 80, 81, 56, 55, 40],[28, 48, 40, 19, 86, 27, 90],["January", "February", "March", "April", "May", "June", "July"]
+    ctxL = '';
+    var lbl = '';
+    var colr = '';
+    if(chart_no == 1){
+        ctxL = document.getElementById("lineChart1").getContext('2d');
+        lbl = "First dataset";
+        colr = 'rgba(0, 10, 130, .7)';
+    }else if(chart_no == 2){
+        ctxL = document.getElementById("lineChart2").getContext('2d');
+        lbl = "Second dataset";
+        colr = 'rgba(200, 99, 132, .7)';
+    }
+    if(ctxL != ''){
+        chart(data_set, labels_set, ctxL, lbl, colr)
+    } 
+    
+}
+function chart(data_set, labels_set, ctxL, lbl, colr){
+    var myLineChart = new Chart(ctxL, {
+        type: 'line',
+        data: {
+            labels: labels_set,
+            datasets: [{
+                label: lbl,
+                data: data_set,
+                backgroundColor: colr,
+                borderColor: ['rgba(200, 99, 132, .7)',],
+                borderWidth: 2
+            }]
+        },
+        options: {
+        responsive: true
+    }
+    });
+}
+        
+</script>
+</body>
+</html>
