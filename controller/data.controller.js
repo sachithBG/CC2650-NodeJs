@@ -65,7 +65,7 @@ module.exports.saveData = async (req, res, next) =>{
                 for(var l in array[k][i][j]){
                     try {
                         // console.log(typeof state[0].sens_tag_day == "undefined")
-                        if(state[0] == 'stop' || typeof state[0].sens_tag_day == "undefined"){
+                        if(state[0] == 'stop' || typeof state[0] == "undefined" || state[0] == []){
                             await stp.then(async function(stt) {
                                 if(state[0] == stt || typeof state[0].sens_tag_day == "undefined"){
                                     res.header("Cache-Control", "no-cache, no-store, must-revalidate");
@@ -75,7 +75,9 @@ module.exports.saveData = async (req, res, next) =>{
                                  }
                             });
                         }
-                        if(typeof state[0].sens_tag_day != "undefined"){
+                        
+                        if(typeof state[0] != "undefined" && state[0] != []){
+                            console.log(state[0]);
                         await p2.then(async function(db_a) {
                             var er = 'Ok';
                             await db_a.child(i+'/'+j+'/'+l+'/').update(array[k][i][j][l], function () {
@@ -103,7 +105,7 @@ module.exports.saveData = async (req, res, next) =>{
                         }); 
                     }
                     }catch(err) {
-                        console.log('promise err');
+                        // console.log('promise err1');
                     }    
                      
                     // console.log("data has been removed"+ JSON.stringify(array[k][i][j]));
