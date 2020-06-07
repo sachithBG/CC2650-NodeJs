@@ -104,11 +104,20 @@
             opacity: 0;
         }
         }
-        /* loader */
+        /* footer */
+        footer ul{
+            font-weight: 700;
+            font: 1em sans-serif;
+            align-self: center;
+            margin-top: 40px;
+            }
+        footer{
+            background-color:darkgray
+        }
         
     </style>
 </head>
-<body>
+<body class="card" style="margin-top: 30px;padding:2%">
     <div class="col-md-6 text-center loader" style="margin: 20% 25%;">
         <div class="spinner-grow" style="width: 5rem; height: 5rem;" role="status">
             <span class="sr-only">Loading...</span>
@@ -120,26 +129,26 @@
             <button class="btn btn-sm btn-outline-primary" type="submit" style="background-color: white;margin: 10px;">Log Out</button>
         </div>
         <div class="text-success" style="float: right;margin: 5px;">
-            <h4>Hi <%= name %></h4>
+            <h4 class="panel-title text-danger">Hi <%= name %></h4>
         </div>
-        <div class="text-primary" style="float: left; font-size: 12em;margin: 5px;">
-            <h4><span class=""></span> CC2650</h4>
+        <div class="text-primary" style="float: left; font-size: 13em;margin-top: -2px;margin-left: 10px;">
+            <h4><span class=""></span> The Ruhuna IOT Project</h4>
         </div>
     </form>
-    <form class="form-control" class="card">
+    <form class="form-control" style="height: 60px;margin-top: -20px;" class="card">
       <div class="">
         <div class="text-primary">
-            <div class="panel panel-primary filterable" style="width: 200%;" id="table_">
+            <div class="panel panel-primary filterable" style="width: 198%;margin-top: 90px;" id="table_">
                 <div class="panel-heading">
                     <div class="sonar-wrapper">
                         <div class="sonar-emitter">
                             <div class="sonar-wave"></div>
                             <div class="pull-left" style="width: 300px;">
-                                <h4 class="panel-title" style="margin-right: 10px;margin-top: 30px;">New data</h4>
+                                <h4 class="panel-title" style="margin-right: 10px;margin-top: 30px;">New Data</h4>
                             </div>
                             <div class="pull-right">
                                 <button href="#" class="btn btn-default btn-xs btn-filter" style="margin-right: 10px;margin-top: 30px;">
-                                    <span class="glyphicon glyphicon-filter"></span> Filter
+                                    <span class="glyphicon glyphicon-search"></span> Search
                                 </button>
                             </div>
                             <div class="pull-right">
@@ -239,7 +248,7 @@
                 <i class="fas fa-check-square pull-left save_btn_ok" style="font-size:25px;color:green;margin-left: -18px;"></i>
                 <div class="pull-right" style="margin-right: 15px;">
                     <form action="/data/all_data" method="GET" >
-                        <button type="submit" class="btn btn-primary btn-sm">Preview data</button>
+                        <button type="submit" class="btn btn-primary btn-sm">Preview Data</button>
                     </form>
                 </div>
             </div>
@@ -247,7 +256,15 @@
     </div>
     
     <!--..................... all data tbl ...................... -->
-    
+    <footer class="" style="margin-bottom:-500px;margin-top: 60px;">
+        <div class="card text-center">
+            <div class="card-header" style="height: 100px">
+              <ul class="card-header-pills text-dark text-center">
+                &copy 2020 Project RIOT. All Right Received.
+              </ul>
+        </div>
+        </div>
+    </footer>
 
     <!-- .......... -->
   </div>
